@@ -1,7 +1,7 @@
 # File sorter and JPG convertor
 Lightweight application that can sort and convert images to JPG's
 
-![File sorter and JPG convertor](https://github.com/JohannesBOZZ/File-sorter-and-JPG-convertor/assets/95292913/cfd3f592-8a29-415c-bc6b-7b75046d7802)
+![File sorter and JPG convertor](https://github.com/JohannesBOZZ/File-sorter-and-JPG-convertor/assets/95292913/44809dff-179c-43b1-814d-ef025b673941)
 
 ## How to use:
 
