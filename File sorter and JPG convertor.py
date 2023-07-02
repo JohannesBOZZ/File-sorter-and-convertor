@@ -3,6 +3,7 @@ import os
 import shutil
 import customtkinter as ctk
 import tkinter
+import re
 from datetime import datetime
 from PIL import Image
 
@@ -50,7 +51,7 @@ def date_or_Name_sorter(source_folder, destination_folder):
         if mode == 'Date':
             sorted_files = sorted(files, key=lambda x: os.path.getmtime(os.path.join(root, x)))
         elif mode == 'Name':
-            sorted_files = sorted(files, key=lambda x: x)
+            sorted_files = sorted(files, key=lambda x: int(re.findall(r'\d+', x)[0]))
 
     # Copy the files to the destination folder and number them
         for i, file in enumerate(sorted_files, start=1):
@@ -96,7 +97,7 @@ def date_or_name_sorter_jpg(source_folder, destination_folder, quality):
         if mode == 'Date & JPG':
             sorted_files = sorted(files, key=lambda x: os.path.getmtime(os.path.join(root, x)))
         elif mode == 'Name & JPG':
-            sorted_files = sorted(files, key=lambda x: x)
+            sorted_files = sorted(files, key=lambda x: int(re.findall(r'\d+', x)[0]))
     # Copy the files to the destination folder and number them
         for i, file in enumerate(sorted_files, start=1):
             source_path = os.path.join(root, file)
