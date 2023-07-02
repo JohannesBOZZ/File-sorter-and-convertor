@@ -10,7 +10,7 @@ Lightweight application that can sort and convert images to JPG's
 3. Enter a quality for the jpg 0-100 whwn you have a mode with "JPG" in it.
 4. Press sort.
 
-## modes
+## Modes
 
 **Date**: Sorts the images by the time they got modified and numbers them. When there are already file in the destination folder then the the first image stats withe the number of how many files are in destination folder for example when there are 50 file in the destination folder then the first image would be 50.jpg. that is the case for all modes thet sort
 
