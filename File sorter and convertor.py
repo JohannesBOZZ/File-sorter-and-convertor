@@ -21,13 +21,13 @@ def select_mode():
     mode = f'{option_menu_sort.get()} {option_menu_convert.get()}'
     os.makedirs(dst.get(), exist_ok=True)
     try:
-        if mode == 'Date None' or mode == 'Name None':
+        if mode == 'Date None' or mode == 'Name None' or mode == 'Date revers None' or mode == 'Name revers None':
             date_or_Name_sorter(src.get(), dst.get())
-        elif mode == 'Date JPG' or mode == 'Name JPG':
+        elif mode == 'Date JPG' or mode == 'Name JPG' or mode == 'Date revers JPG' or mode == 'Name revers JPG':
             date_or_name_sorter_jpg(src.get(), dst.get(), int(jpg_quality.get()))
         elif mode == 'None JPG':
             convert_to_jpg(src.get(), dst.get(), int(jpg_quality.get()))
-        elif mode == 'Date PNG' or mode == 'Name PNG':
+        elif mode == 'Date PNG' or mode == 'Name PNG' or mode == 'Date revers PNG' or mode == 'Name revers PNG':
             date_or_Name_sorter_png(src.get(), dst.get())
         elif mode == 'None PNG':
             convert_to_png(src.get(), dst.get())
@@ -62,7 +62,10 @@ def date_or_Name_sorter(source_folder, destination_folder):
             sorted_files = sorted(files, key=lambda x: os.path.getmtime(os.path.join(root, x)))
         elif mode == 'Name None':
             sorted_files = sorted(files, key=natural_sort_key)
-
+        elif mode == 'Date revers None':
+            sorted_files = sorted(files, key=lambda x: os.path.getmtime(os.path.join(root, x)), reverse=True)
+        elif mode == 'Name revers None':
+            sorted_files = sorted(files, key=natural_sort_key, reverse=True)
     # Copy the files to the destination folder and number them
         for i, file in enumerate(sorted_files, start=1):
             source_path = os.path.join(root, file)
@@ -97,23 +100,32 @@ def date_or_name_sorter_jpg(source_folder, destination_folder, quality):
             sorted_files = sorted(files, key=lambda x: os.path.getmtime(os.path.join(root, x)))
         elif mode == 'Name JPG':
             sorted_files = sorted(files, key=natural_sort_key)
+        elif mode == 'Date revers JPG':
+            sorted_files = sorted(files, key=lambda x: os.path.getmtime(os.path.join(root, x)), reverse=True)
+        elif mode == 'Name revers JPG':
+            sorted_files = sorted(files, key=natural_sort_key, reverse=True)
+
     # Copy the files to the destination folder and number them
         for i, file in enumerate(sorted_files, start=1):
             source_path = os.path.join(root, file)
             filename, file_extension = os.path.splitext(source_path)
-            destination_path = os.path.join(destination_folder, f"{count}.jpg")
+            if file_extension.endswith((".png", ".jpg", ".jpeg")):
+                destination_path = os.path.join(destination_folder, f"{count}.jpg")
 
-            # Checks whether checkbox wb is selected or not
-            if wb:
-                img = Image.open(source_path).convert('L')
-            else:
-                img = Image.open(source_path)
-            img = img.convert("RGB")  # Umwandlung in den RGB-Modus
-            img.save(destination_path, "JPEG", quality=quality)
-            
+                # Checks whether checkbox wb is selected or not
+                if wb:
+                    img = Image.open(source_path).convert('L')
+                else:
+                    img = Image.open(source_path).convert("RGB")
+                img.save(destination_path, "JPEG", quality=quality)
+            else:    
+                destination_path = os.path.join(destination_folder, f"{count}{file_extension}")
+                shutil.copy2(source_path, destination_path)
+
             count += 1
             convertet_image_count += 1
             progress_bar_def(convertet_image_count)
+            
 
 
     end_time = time.time()
@@ -136,8 +148,7 @@ def convert_to_jpg(input_folder, output_folder, quality):
                 if wb:
                     img = Image.open(input_path).convert('L')
                 else:
-                    img = Image.open(input_path)
-                img = img.convert("RGB")  # Umwandlung in den RGB-Modus
+                    img = Image.open(input_path).convert("RGB") 
                 img.save(output_path, "JPEG", quality=quality)
                 convertet_image_count += 1
                 progress_bar_def(convertet_image_count)
@@ -166,17 +177,26 @@ def date_or_Name_sorter_png(source_folder, destination_folder):
             sorted_files = sorted(files, key=lambda x: os.path.getmtime(os.path.join(root, x)))
         elif mode == 'Name PNG':
             sorted_files = sorted(files, key=natural_sort_key)
+        elif mode == 'Date revers PNG':
+            sorted_files = sorted(files, key=lambda x: os.path.getmtime(os.path.join(root, x)), reverse=True)
+        elif mode == 'Name revers PNG':
+            sorted_files = sorted(files, key=natural_sort_key, reverse=True)
 
     # Copy the files to the destination folder and number them
         for i, file in enumerate(sorted_files, start=1):
             source_path = os.path.join(root, file)
-            # Checks whether checkbox wb is selected or not
-            if wb:
-                img = Image.open(source_path).convert('L')
+            filename, file_extension = os.path.splitext(source_path)
+            if file_extension.endswith((".png", ".jpg", ".jpeg")):
+                # Checks whether checkbox wb is selected or not
+                if wb:
+                    img = Image.open(source_path).convert('L')
+                else:
+                    img = Image.open(source_path)
+                png_path = os.path.join(destination_folder, f"{count}.png")
+                img.save(png_path, 'PNG')
             else:
-                img = Image.open(source_path)
-            png_path = os.path.join(destination_folder, f"{count}.png")
-            img.save(png_path, 'PNG')
+                destination_path = os.path.join(destination_folder, f"{count}{file_extension}")
+                shutil.copy2(source_path, destination_path)
             count += 1
             convertet_image_count += 1
             progress_bar_def(convertet_image_count)
@@ -192,14 +212,6 @@ def convert_to_png(input_folder, output_folder):
     wb = chackbox_wb.get()
     convertet_image_count = 0
 
-    # Durchlaufe alle Dateien und Unterordner im angegebenen Ordner
-    '''for root, _, files in os.walk(folder_path):
-        for file in files:
-            file_path = os.path.join(root, file)
-            filename, file_extension = os.path.splitext(file_path)
-
-            # Überprüfen, ob die Datei eine unterstützte Bildendung hat
-            if any(file.lower().endswith(ext) for ext in image_extensions):'''
     for filename in os.listdir(input_folder):
             if filename.endswith((".png", ".jpg", ".jpeg")):
                 input_path = os.path.join(input_folder, filename)
@@ -253,8 +265,8 @@ def mode(self):
     mode = f'{option_menu_sort.get()} {option_menu_convert.get()}'
     # shows jpg_quality and chackbox_wb
     if 'JPG' in mode and 'PNG' not in mode:
-        jpg_quality.place(relx=0.64, rely=0.4, anchor=tkinter.CENTER)
-        chackbox_wb.place(relx=0.86, rely=0.4, anchor=tkinter.CENTER)
+        jpg_quality.place(relx=0.64, rely=0.49, anchor=tkinter.CENTER)
+        chackbox_wb.place(relx=0.86, rely=0.49, anchor=tkinter.CENTER)
     # shows chackbox_wb and hidersjpg_quality
     elif 'PNG' in mode:
         chackbox_wb.place(relx=0.65, rely=0.49, anchor=tkinter.CENTER)
@@ -279,19 +291,19 @@ def consol_message(end_time, start_time, convertet_image_count):
     now = datetime.now()
     # message after process is done
     status_textbox.configure(state="normal")
-    status_textbox.insert("0.0",f'[{str(now.strftime("%Y/%m/%d, %H:%M:%S"))}] Procces was sucessfully, {convertet_image_count} files in {process_time}\n')
+    status_textbox.insert("0.0",f'[{str(now.strftime("%Y/%m/%d, %H:%M:%S"))}] Procces was sucessfully, {convertet_image_count} files{process_time}\n')
     status_textbox.configure(state="disabled")
 global Value
 Value = 0
 
-def progress_bar_def(Value):
+def progress_bar_def(value):
     end = 0
     qualle = src.get()
     for root, dirs, files in os.walk(qualle):
         end += len(files)
-    Value /= end
+    Value = value / end
     # Nach 1 Sekunde erneut aufrufen
-    progress_bar_text.configure(text=f'{round(Value * 100)} %')
+    progress_bar_text.configure(text=f'{round(Value * 100)}% | {value} of {end}')
     progress_bar_text.update()
     progress_bar.set(Value)
     progress_bar.update()
@@ -332,21 +344,21 @@ jpg_quality = ctk.CTkEntry(master=frame,
 # menu for changing the sort mode
 option_menu_sort = ctk.CTkOptionMenu(master=frame,
                                 font=('sora', 20),
-                                width=120,
+                                width=180,
                                 height=36,
                                 corner_radius=5,
-                                values=['Date', 'Name', 'None'],
+                                values=['Date', 'Name', 'Date revers', 'Name revers', 'None'],
                                 command=mode,)
-option_menu_sort.place(relx=0.28, rely=0.49, anchor=tkinter.CENTER)
+option_menu_sort.place(relx=0.263, rely=0.49, anchor=tkinter.CENTER)
 # menu for changing the convert mode
 option_menu_convert = ctk.CTkOptionMenu(master=frame,
                                 font=('sora', 20),
-                                width=120,
+                                width=100,
                                 height=36,
                                 corner_radius=5,
                                 values=['PNG', 'JPG', 'None'],
                                 command=mode,)
-option_menu_convert.place(relx=0.45, rely=0.49, anchor=tkinter.CENTER)
+option_menu_convert.place(relx=0.452, rely=0.49, anchor=tkinter.CENTER)
 # if you wont AI generated images
 chackbox_wb = ctk.CTkCheckBox(master=frame, 
                                 font=('sora', 20),
@@ -359,10 +371,11 @@ chackbox_wb.place(relx=0.65, rely=0.49, anchor=tkinter.CENTER)
 button = ctk.CTkButton(master=frame,
                                     height=32,
                                     corner_radius=5,
+                                    width=100,
                                     text='Sort',
                                     font=('sora', 20),
                                     command=select_mode,)
-button.place(relx=0.1, rely=0.49, anchor=tkinter.CENTER)
+button.place(relx=0.076, rely=0.49, anchor=tkinter.CENTER)
 # textbox whith exit message
 status_textbox = ctk.CTkTextbox(master=frame,
                                         font=('sora', 16),
@@ -374,15 +387,14 @@ status_textbox.place(relx=0.5, rely=0.76, anchor=tkinter.CENTER)
 status_textbox.configure(state="disabled")
 
 progress_bar = ctk.CTkProgressBar(master=frame,
-                                width=780,
+                                width=700,
                                 mode='determinate',)
-progress_bar.place(relx=0.474, rely=0.99, anchor=tkinter.CENTER)
+progress_bar.place(relx=0.4275, rely=0.99, anchor=tkinter.CENTER)
 progress_bar.set(0)
 
 progress_bar_text = ctk.CTkLabel(master=frame,
                                 text='0%',
                                 bg_color='transparent')
-progress_bar_text.place(relx=0.945, rely=0.99, anchor=tkinter.W)
-
+progress_bar_text.place(relx=0.855, rely=0.99, anchor=tkinter.W)
 
 root.mainloop()
