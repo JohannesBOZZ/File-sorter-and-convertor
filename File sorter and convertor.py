@@ -308,6 +308,7 @@ def convert_to_webp(input_folder, output_folder, scale, quality):
     for filename in os.listdir(input_folder):
             if filename.endswith((".png", ".jpg", ".jpeg", ".webp")):
                 input_path = os.path.join(input_folder, filename)
+                filename, fileExtension = os.path.splitext(filename)
                 output_path = os.path.join(output_folder, f'{filename}.webp')
                 img=None
                 # Versuche, das Bild zu öffnen und in PNG zu konvertieren
